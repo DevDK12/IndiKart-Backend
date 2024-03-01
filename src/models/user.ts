@@ -28,7 +28,7 @@ interface UserTypes {
 
 
 
-const UserSchema = new Schema({
+const UserSchema = new Schema<UserTypes>({
     _id: {
         // type: mongoose.Schema.Types.ObjectId,
         type: String,
@@ -51,7 +51,7 @@ const UserSchema = new Schema({
     email: {
         type: String,
         required: [true, 'Email is required'],
-        unique: [true, 'Email is already exist'],
+        unique: true,
         validator: validator.default.isEmail,
     },
     role: {

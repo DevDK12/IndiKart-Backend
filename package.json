@@ -27,11 +27,15 @@
     "express-validator": "^7.0.1",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.2.0",
+    "multer": "^1.4.5-lts.1",
     "uuid": "^9.0.1",
     "validator": "^13.11.0"
   },
   "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/colors": "^1.2.1",
     "@types/express": "^4.17.21",
+    "@types/multer": "^1.4.11",
     "@types/node": "^20.11.20",
     "@types/validator": "^13.11.9",
     "ts-node": "^10.9.2"

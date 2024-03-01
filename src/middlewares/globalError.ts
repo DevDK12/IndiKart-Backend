@@ -5,7 +5,7 @@ import AppError from "../error/appError.js";
 
 
 
-const snedDevelemntError = (err: AppError, res: Response) => {
+const snedDevelopmentError = (err: AppError, res: Response) => {
     res.status(err.statusCode).json({
         status: err.status,
         error: err,
@@ -50,13 +50,13 @@ const globalError = (err: AppError | any, req: Request, res: Response, next: Nex
     err.statusCode = err.statusCode || 500;
     err.status = err.status || 'error';
 
-    console.log('ERR CAUGHT IN GLOBAL MIDDLEWARE'.red.bold);
+    // console.log('ERR CAUGHT IN GLOBAL MIDDLEWARE'.red.bold);
+    console.log('ERR CAUGHT IN GLOBAL MIDDLEWARE');
     console.log(`ERR ${err}`);
     console.log(err.stack);
 
-
-    if (process.env.NODE_ENV === 'developement') {
-        snedDevelemntError(err, res);
+    if (process.env.NODE_ENV === 'development') {
+        snedDevelopmentError(err, res);
     }
     else if (process.env.NODE_ENV === 'production') {
 
@@ -69,7 +69,7 @@ const globalError = (err: AppError | any, req: Request, res: Response, next: Nex
     }
 
 
-
+    next();
 
 }
 
