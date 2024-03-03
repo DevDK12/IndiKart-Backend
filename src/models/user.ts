@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import validator from "validator";
 
-import {genderTypes, roleTypes} from "../types/types.js";
+import {genderTypes, roleTypes} from "../types/UserTypes.js";
 
 
 

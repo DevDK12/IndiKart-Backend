@@ -4,7 +4,7 @@ import { NextFunction, Request, Response } from "express";
 import Product from '../models/product.js'
 import CatchAsync from "../error/catchAsync.js";
 import AppError from "../error/appError.js";
-import { BaseQueryType, SearchRequestQuery, newProductReqType } from "../types/types.js";
+import { BaseQueryType, SearchRequestQuery, newProductReqType } from "../types/ProductTypes.js";
 import { deleteImage, invalidateCache } from "../utils/functions.js";
 import { myCache } from "../app.js";
 

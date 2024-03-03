@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 
 
-import { postRegisterUserTypes } from "../types/types.js";
+import { postRegisterUserTypes } from "../types/UserTypes.js";
 import User from '../models/user.js'
 import CatchAsync from "../error/catchAsync.js";
 import { genHashedPassword } from "../utils/functions.js";
