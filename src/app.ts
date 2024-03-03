@@ -1,9 +1,11 @@
 import express, { Request, Response, NextFunction } from 'express';
 import dotenv from 'dotenv'; dotenv.config()
 
+import globalError from './middlewares/globalError.js';
 
 import userRouter from './routes/user.js';
-import globalError from './middlewares/globalError.js';
+import productRouter from './routes/product.js';
+import { deleteRandomsProducts, generateRandomProducts } from './utils/generateRandomProducts.js';
 
 
 const app = express();
@@ -30,7 +32,28 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 
 
 
+app.use('/uploads', express.static('uploads'));
+
+
 app.use('/api/v1/user', userRouter);
+app.use('/api/v1/product', productRouter);
+
+
+app.use('/api/v1/create-data', (req, res, next) => {
+
+    const { type, name , amount} = req.query
+    if (type === 'new'){
+        if(name === "products") generateRandomProducts(Number(amount));
+    }
+    else {
+        if(name === "products") deleteRandomsProducts(Number(amount));
+    }
+
+    return res.status(200).json({
+        status: 'success',
+        message: `Data ${type === 'new' ? 'created' : 'deleted'} successfully`,
+    })
+});
 
 
 
