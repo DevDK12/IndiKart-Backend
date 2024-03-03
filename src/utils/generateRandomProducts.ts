@@ -1,17 +1,16 @@
 import {faker} from '@faker-js/faker';
-import CatchAsync from "../error/catchAsync.js";
 import Product from "../models/product.js";
 
 
 
 
-export const generateRandomProducts = async (count: number = 10) => {
+export const generateRandomProducts = async (count: number = 10, url: string) => {
     const products = [];
 
     for (let i = 0; i < count; i++) {
         const product = {
             name: faker.commerce.productName(),
-            photo: "uploads\\0a3123b8-39ac-4289-b23a-ff9941730971.jpg",
+            photo: url,
             price: faker.commerce.price({ min: 1500, max: 80000, dec: 0 }),
             stock: faker.commerce.price({ min: 0, max: 100, dec: 0 }),
             category: faker.commerce.department().toLowerCase(),

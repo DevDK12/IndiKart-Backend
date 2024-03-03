@@ -2,6 +2,9 @@ import fs from 'fs';
 import bcrypt from 'bcryptjs';
 import { myCache } from '../app.js';
 import { invalidateCacheType } from '../types/types.js';
+import { OrderItemType } from '../types/OrderTypes.js';
+import Product from '../models/product.js';
+import AppError from '../error/appError.js';
 
 export const genHashedPassword = async (password: string) => {
     const hashedPassword = await bcrypt.hash(password, 12);
@@ -32,13 +35,32 @@ export const invalidateCache = async ({
 
     if (products) {
 
-        const productCacheKeys = myCache.keys();
+        const productCacheKeys = myCache.keys().filter(key => key.includes('product'));
         myCache.del(productCacheKeys);
-
+        
     };
+    
+    if(order){
+        const orderCacheKeys = myCache.keys().filter(key => key.includes('order'));
+        myCache.del(orderCacheKeys);
+    }
+
+    if(admin){
+        const adminCacheKeys = myCache.keys().filter(key => key.includes('admin'));
+        myCache.del(adminCacheKeys);
+    }
 }
 
 
 
+
+export const reduceStock = async (orderItems: [OrderItemType]) => {
+    orderItems.forEach(async (item) => {
+        const product = await Product.findById(item.productId);
+        if (!product) throw new AppError('No product found', 400);
+        product.stock -= item.quantity;
+        await product.save();
+    });
+}
 
 
