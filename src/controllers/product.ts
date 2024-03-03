@@ -5,7 +5,8 @@ import Product from '../models/product.js'
 import CatchAsync from "../error/catchAsync.js";
 import AppError from "../error/appError.js";
 import { BaseQueryType, SearchRequestQuery, newProductReqType } from "../types/types.js";
-import { deleteImage } from "../utils/functions.js";
+import { deleteImage, invalidateCache } from "../utils/functions.js";
+import { myCache } from "../app.js";
 
 
 
@@ -33,6 +34,8 @@ export const postNewProduct = CatchAsync(async (
             category: category.toLowerCase(),
             price,
         });
+
+        await invalidateCache({ products: true });
     }
     catch (err: any) {
         deleteImage(photo.path);
@@ -62,7 +65,18 @@ export const getSingleProduct = CatchAsync(async (req, res, next) => {
 
     const { productId } = req.params;
 
-    const product = await Product.findById(productId);
+    let product;
+    if (myCache.has(`product-${productId}`)) {
+        product = JSON.parse(myCache.get(`product-${productId}`) as string);
+    }
+    else {
+        product = await Product.findById(productId);
+        if (product) myCache.set(`product-${productId}`, JSON.stringify(product));
+    }
+
+
+    if (!product) throw new AppError('No product found', 400);
+
 
     res.status(200).json({
         status: 'success',
@@ -88,6 +102,8 @@ export const deleteProduct = CatchAsync(async (req, res, next) => {
         _id: productId,
     });
 
+    await invalidateCache({ products: true });
+
     deleteImage(product.photo, () => console.log('Old Image deleted'));
 
     res.status(200).json({
@@ -104,7 +120,16 @@ export const deleteProduct = CatchAsync(async (req, res, next) => {
 
 export const getLatestProducts = CatchAsync(async (req, res, next) => {
 
-    const products = await Product.find().sort({ createdAt: -1 }).limit(5);
+    let products = [];
+    if (myCache.has('latest-products')) {
+        // products = JSON.parse(myCache.get('latest-products')!);
+        products = JSON.parse(myCache.get('latest-products') as string);
+    }
+    else {
+        products = await Product.find().sort({ createdAt: -1 }).limit(5);
+        myCache.set('latest-products', JSON.stringify(products));
+    }
+    // products = await Product.find().sort({ createdAt: -1 }).limit(5);
 
 
     res.status(200).json({
@@ -122,7 +147,14 @@ export const getLatestProducts = CatchAsync(async (req, res, next) => {
 
 export const getAllCategories = CatchAsync(async (req, res, next) => {
 
-    const categories = await Product.find().distinct('category');
+    let categories;
+    if (myCache.has('categoires')) {
+        categories = JSON.parse(myCache.get('categoires') as string);
+    }
+    else {
+        categories = await Product.find().distinct('category');
+        myCache.set('categoires', JSON.stringify(categories));
+    }
 
 
     res.status(200).json({
@@ -140,7 +172,14 @@ export const getAllCategories = CatchAsync(async (req, res, next) => {
 
 export const getAdminProducts = CatchAsync(async (req, res, next) => {
 
-    const products = await Product.find({ role: 'admin' });
+    let products;
+    if (myCache.has('all-products')) {
+        products = JSON.parse(myCache.get('all-products') as string);
+    }
+    else {
+        products = await Product.find({});
+        myCache.set('all-products', JSON.stringify(products));
+    }
 
 
     res.status(200).json({
@@ -192,6 +231,7 @@ export const putUpdateProduct = CatchAsync(async (req, res, next) => {
     product.price = price ?? product.price;
 
     await product.save();
+    await invalidateCache({ products: true });
 
 
     res.status(201).json({
@@ -209,7 +249,7 @@ export const getQueryProducts = CatchAsync(async (req: Request<{}, {}, {}, Searc
     const { search, category, sort, price } = req.query;
 
     const page = Number(req.query.page) || 1;
-    const limit = Number(process.env.ITEMS_PER_PAGE) || 10;
+    const limit = Number(process.env.PRODUCTS_PER_PAGE) || 10;
     const skip = (page - 1) * limit;
 
 

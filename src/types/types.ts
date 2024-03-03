@@ -1,4 +1,5 @@
 import { Response, Request, NextFunction } from "express";
+import { invalidateCache } from "../utils/functions.js";
 
 export type genderTypes = "male" | "female";
 export type roleTypes = "admin" | "user";
@@ -62,3 +63,8 @@ export interface BaseQueryType {
 
 
 
+export type invalidateCacheType = {
+    products?: boolean,
+    admin?: boolean,
+    order?: boolean,
+}
