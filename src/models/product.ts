@@ -1,13 +1,17 @@
-import mongoose from "mongoose";
+import mongoose, { Model } from "mongoose";
+import { IProduct } from "../types/ProductTypes.js";
 
 
 
 
 const Schema = mongoose.Schema;
 
+interface ProductModel extends Model<IProduct> {
+    getMonthProducts : ({start, end}: {start: Date, end: Date}) => Promise<any>,
+}
 
 
-const ProductSchema = new Schema({
+const ProductSchema = new Schema<IProduct, ProductModel>({
 
     photo: {
         type: String,
@@ -48,7 +52,23 @@ const ProductSchema = new Schema({
 
 
 
-const Product = mongoose.model('Product', ProductSchema);
+
+//_ Static Methods
+ProductSchema.static('getMonthProducts', ({start, end}) => {
+    return Product.find({
+        createdAt: {
+            $gte: start,
+            $lte: end,
+        },
+    });
+});
+
+
+
+
+
+
+const Product = mongoose.model<IProduct, ProductModel>('Product', ProductSchema);
 
 
 export default Product;

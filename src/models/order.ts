@@ -1,5 +1,5 @@
-import mongoose from "mongoose";
-import { OrderSchemaType } from "../types/OrderTypes.js";
+import mongoose, { Model } from "mongoose";
+import { IOrder } from "../types/OrderTypes.js";
 
 
 
@@ -8,7 +8,14 @@ const Schema = mongoose.Schema;
 
 
 
-const OrderSchema = new Schema<OrderSchemaType>({
+interface OrderModel extends Model<IOrder> {
+    getMonthOrders: ({ start, end }: { start: Date, end: Date }) => Promise<any>,
+    getLastSixMonthsOrders: () => Promise<any>,
+    getLatestTransactions: () => Promise<any>
+}
+
+
+const OrderSchema = new Schema<IOrder, OrderModel>({
 
     shippingInfo: {
         address: {
@@ -84,9 +91,9 @@ const OrderSchema = new Schema<OrderSchemaType>({
             quantity: Number,
             photo: String,
             price: Number,
-            productId: {
+            OrderId: {
                 type: mongoose.Types.ObjectId,
-                ref: 'Product',
+                ref: 'Order',
             },
         }
     ],
@@ -106,7 +113,39 @@ const OrderSchema = new Schema<OrderSchemaType>({
 
 
 
-const Order = mongoose.model<OrderSchemaType>('Order', OrderSchema);
+//_ Static Methods
+OrderSchema.static('getMonthOrders', ({ start, end }) => {
+    return Order.find({
+        createdAt: {
+            $gte: start,
+            $lte: end,
+        },
+    });
+});
+
+
+OrderSchema.static('getLastSixMonthsOrders', () => {
+    const today = new Date();
+    const start = new Date(today.setMonth(today.getMonth() - 6));
+    const end = new Date();
+
+    return Order.find({
+        createdAt: {
+            $gte: start,
+            $lte: end,
+        },
+    })
+        .select(['total', 'createdAt'])
+});
+
+
+OrderSchema.static('getLatestTransactions', () => {
+    return Order.find().select(["orderItems", "discount", "total", "status"]).limit(4)
+});
+
+
+
+const Order = mongoose.model<IOrder, OrderModel>('Order', OrderSchema);
 
 
 export default Order;

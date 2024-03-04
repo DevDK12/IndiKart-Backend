@@ -64,3 +64,32 @@ export const reduceStock = async (orderItems: [OrderItemType]) => {
 }
 
 
+
+export const calculatePercentage = (thisMonth: number, lastMonth: number) => {
+    if (lastMonth === 0) return thisMonth * 100;
+    const percent = (thisMonth / lastMonth) * 100;
+    return Number(percent.toFixed(0));
+};
+
+
+export const getLastSixMonthsChartData = (lastSixMonthsOrders : any)=>{
+    const lastSixMonthsRevenue = new Array(6).fill(0);
+    const lastSixMonthsOrdersCount = new Array(6).fill(0);
+
+    lastSixMonthsOrders.forEach( (order : any) => {
+        const today = new Date();
+        const creationDate = new Date(order.createdAt);
+
+        const monthsDiff = (today.getMonth() - creationDate.getMonth() + 12) % 12;
+
+        if(monthsDiff < 6){
+            lastSixMonthsRevenue[6 - monthsDiff - 1] += order.total;
+            lastSixMonthsOrdersCount[6 - monthsDiff - 1] += 1;
+        }
+    });
+
+    return {
+        lastSixMonthsOrdersCount,
+        lastSixMonthsRevenue,
+    }
+}

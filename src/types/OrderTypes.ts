@@ -31,7 +31,7 @@ export interface NewOrderRequestType {
 }
 
 
-export interface OrderSchemaType extends NewOrderRequestType {
+export interface IOrder extends NewOrderRequestType {
     status: "processing" | "shipped" | "delivered" | "cancelled";
     createdAt: Date;
 }

@@ -1,34 +1,23 @@
 import mongoose from "mongoose";
 import validator from "validator";
 
-import {genderTypes, roleTypes} from "../types/UserTypes.js";
+import {IUser, genderTypes, roleTypes} from "../types/UserTypes.js";
+import { Model } from "mongoose";
 
 
 
 const Schema = mongoose.Schema;
 
 
-
-interface UserTypes {
-    // _id: mongoose.Schema.Types.ObjectId;
-    _id: string;
-    image: string;
-    username: string;
-    password: string;
-    email: string;
-    role: roleTypes;
-    gender: genderTypes;
-    dob: Date;
-    createdAt: Date;
-    updatedAt: Date;
-
-    // Virtuals
-    age: number;
+interface UserModel extends Model<IUser> {
+    getMonthUsers : ({start, end}: {start: Date, end: Date}) => Promise<any>,
 }
 
 
 
-const UserSchema = new Schema<UserTypes>({
+
+
+const UserSchema = new Schema<IUser, UserModel>({
     _id: {
         // type: mongoose.Schema.Types.ObjectId,
         type: String,
@@ -93,7 +82,23 @@ UserSchema.virtual('age').get(function () {
 });
 
 
-const User = mongoose.model<UserTypes>('User', UserSchema);
+
+
+
+//_ Static Methods
+UserSchema.static('getMonthUsers', ({start, end}) => {
+    return User.find({
+        createdAt: {
+            $gte: start,
+            $lte: end,
+        },
+    });
+});
+
+
+
+
+const User = mongoose.model<IUser, UserModel>('User', UserSchema);
 
 
 export default User;
