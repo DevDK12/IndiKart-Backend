@@ -5,7 +5,7 @@ import Product from "../models/product.js";
 import User from "../models/user.js";
 import { IOrder } from "../types/OrderTypes.js";
 import { IUser } from "../types/UserTypes.js";
-import { calculatePercentage, getLastSixMonthsChartData } from "../utils/functions.js";
+import { calculatePercentage, getChartData } from "../utils/functions.js";
 
 
 
@@ -37,6 +37,11 @@ export const getDashboardStats = CatchAsync(async (req, res, next) => {
         end: new Date(today.getFullYear(), today.getMonth(), 0),
     };
 
+    const lastSixMonths = {
+        start: new Date((new Date()).setMonth((new Date).getMonth() - 6)),
+        end: new Date(),
+    }
+
 
 
     const [
@@ -64,7 +69,7 @@ export const getDashboardStats = CatchAsync(async (req, res, next) => {
         Product.countDocuments(),
         User.countDocuments(),
         Order.find().select('total'),
-        Order.getLastSixMonthsOrders(),
+        Order.getMonthOrders(lastSixMonths),
         User.find({ gender: 'male' }).countDocuments(),
         User.find({ gender: 'female' }).countDocuments(),
         Order.getLatestTransactions(),
@@ -90,8 +95,19 @@ export const getDashboardStats = CatchAsync(async (req, res, next) => {
     }
 
 
-    const lastSixMonthsChart = getLastSixMonthsChartData(lastSixMonthsOrders);
 
+
+    const lastSixMonthsChart = {
+        lastSixMonthsOrders: getChartData({
+            months: 6,
+            docArray: lastSixMonthsOrders,
+        }),
+        lastSixMonthsRevenue: getChartData({
+            months: 6,
+            docArray: lastSixMonthsOrders,
+            property: 'total',
+        }),
+    };
 
     const userRatio = {
         male: males,
@@ -248,7 +264,7 @@ export const getPieCharts = CatchAsync(async (req, res, next) => {
 
 export const getBarCharts = CatchAsync(async (req, res, next) => {
 
-    const key = 'admin-pie-chart';
+    const key = 'admin-bar-chart';
 
     if (myCache.has(key)) {
         const charts = JSON.parse(myCache.get(key) as string);
@@ -262,14 +278,34 @@ export const getBarCharts = CatchAsync(async (req, res, next) => {
     }
 
 
+    const sixMonthsAgo = {
+        start: new Date(new Date().setMonth(new Date().getMonth() - 6)),
+        end: new Date(),
+    }
 
-    
+    const twelveMonthsAgo = {
+        start: new Date((new Date()).setMonth((new Date).getMonth() - 12)),
+        end: new Date(),
+    }
 
 
+
+    const [products, users, orders] = await Promise.all([
+        Product.getMonthProducts(sixMonthsAgo),
+        User.getMonthUsers(sixMonthsAgo),
+        Order.getMonthOrders(twelveMonthsAgo),
+    ]);
+
+
+    const productCounts = getChartData({ months: 6, docArray: products });
+    const usersCounts = getChartData({ months: 6, docArray: users });
+    const ordersCounts = getChartData({ months: 12, docArray: orders });
 
     const charts = {
-
-    }
+        products: productCounts,
+        users: usersCounts,
+        orders: ordersCounts,
+    };
 
     myCache.set(key, JSON.stringify(charts));
 
@@ -289,6 +325,55 @@ export const getBarCharts = CatchAsync(async (req, res, next) => {
 
 export const getLineCharts = CatchAsync(async (req, res, next) => {
 
+
+    const key = 'admin-line-chart';
+
+    if (myCache.has(key)) {
+        const charts = JSON.parse(myCache.get(key) as string);
+
+        return res.status(200).json({
+            status: "success",
+            data: {
+                charts,
+            }
+        })
+    }
+
+    
+
+    const twelveMonthsAgo = {
+        start: new Date((new Date()).setMonth((new Date).getMonth() - 12)),
+        end: new Date(),
+    }
+
+
+    const [products, users, orders] = await Promise.all([
+        Product.getMonthProducts(twelveMonthsAgo),
+        User.getMonthUsers(twelveMonthsAgo),
+        Order.getMonthOrders(twelveMonthsAgo),
+    ]);
+
+    const productCounts = getChartData({ months: 12, docArray: products });
+    const usersCounts = getChartData({ months: 12, docArray: users });
+    const discount = getChartData({months: 12,docArray: orders,property: "discount",});
+    const revenue = getChartData({months: 12,docArray: orders,property: "total",});
+
+    const charts = {
+        users: usersCounts,
+        products: productCounts,
+        discount,
+        revenue,
+    };
+
+    myCache.set(key, JSON.stringify(charts));
+
+
+    return res.status(200).json({
+        status: "success",
+        data: {
+            charts,
+        }
+    })
 
 });
 

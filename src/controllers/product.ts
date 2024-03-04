@@ -35,7 +35,7 @@ export const postNewProduct = CatchAsync(async (
             price,
         });
 
-        await invalidateCache({ products: true });
+        await invalidateCache({ products: true, admin: true });
     }
     catch (err: any) {
         deleteImage(photo.path);
@@ -102,7 +102,7 @@ export const deleteProduct = CatchAsync(async (req, res, next) => {
         _id: productId,
     });
 
-    await invalidateCache({ products: true });
+    await invalidateCache({ products: true, admin: true });
 
     deleteImage(product.photo, () => console.log('Old Image deleted'));
 
@@ -231,7 +231,7 @@ export const putUpdateProduct = CatchAsync(async (req, res, next) => {
     product.price = price ?? product.price;
 
     await product.save();
-    await invalidateCache({ products: true });
+    await invalidateCache({ products: true, admin: true });
 
 
     res.status(201).json({

@@ -37,15 +37,15 @@ export const invalidateCache = async ({
 
         const productCacheKeys = myCache.keys().filter(key => key.includes('product'));
         myCache.del(productCacheKeys);
-        
+
     };
-    
-    if(order){
+
+    if (order) {
         const orderCacheKeys = myCache.keys().filter(key => key.includes('order'));
         myCache.del(orderCacheKeys);
     }
 
-    if(admin){
+    if (admin) {
         const adminCacheKeys = myCache.keys().filter(key => key.includes('admin'));
         myCache.del(adminCacheKeys);
     }
@@ -72,24 +72,46 @@ export const calculatePercentage = (thisMonth: number, lastMonth: number) => {
 };
 
 
-export const getLastSixMonthsChartData = (lastSixMonthsOrders : IOrder[])=>{
-    const lastSixMonthsRevenue = new Array(6).fill(0);
-    const lastSixMonthsOrdersCount = new Array(6).fill(0);
 
-    lastSixMonthsOrders.forEach( (order : any) => {
-        const today = new Date();
-        const creationDate = new Date(order.createdAt);
+
+
+
+
+
+
+
+interface MyDocument extends Document {
+    createdAt: Date;
+    discount?: number;
+    total?: number;
+}
+
+type getChartDataProps = {
+    months: number;
+    docArray: MyDocument[];
+    property?: "discount" | "total";
+};
+
+export const getChartData = ({
+    docArray,
+    months,
+    property,
+} : getChartDataProps) => {
+    const data = new Array(months).fill(0);
+    const today = new Date();
+
+    docArray.forEach((doc) => {
+        const creationDate = new Date(doc.createdAt);
 
         const monthsDiff = (today.getMonth() - creationDate.getMonth() + 12) % 12;
 
-        if(monthsDiff < 6){
-            lastSixMonthsRevenue[6 - monthsDiff - 1] += order.total;
-            lastSixMonthsOrdersCount[6 - monthsDiff - 1] += 1;
+        if (monthsDiff < 6) {
+            if (property)
+                data[6 - monthsDiff - 1] += doc[property];
+            else
+                data[6 - monthsDiff - 1] += 1;
         }
     });
 
-    return {
-        lastSixMonthsOrdersCount,
-        lastSixMonthsRevenue,
-    }
+    return data;
 }

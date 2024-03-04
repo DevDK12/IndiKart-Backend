@@ -11,7 +11,7 @@ const Schema = mongoose.Schema;
 interface OrderModel extends Model<IOrder> {
     getMonthOrders: ({ start, end }: { start: Date, end: Date }) => Promise<any>,
     getLastSixMonthsOrders: () => Promise<any>,
-    getLatestTransactions: () => Promise<any>
+    getLatestTransactions: () => Promise<any>,
 }
 
 
@@ -124,19 +124,19 @@ OrderSchema.static('getMonthOrders', ({ start, end }) => {
 });
 
 
-OrderSchema.static('getLastSixMonthsOrders', () => {
-    const today = new Date();
-    const start = new Date(today.setMonth(today.getMonth() - 6));
-    const end = new Date();
+// OrderSchema.static('getLastSixMonthsOrders', () => {
+//     const today = new Date();
+//     const start = new Date(today.setMonth(today.getMonth() - 6));
+//     const end = new Date();
 
-    return Order.find({
-        createdAt: {
-            $gte: start,
-            $lte: end,
-        },
-    })
-        .select(['total', 'createdAt'])
-});
+//     return Order.find({
+//         createdAt: {
+//             $gte: start,
+//             $lte: end,
+//         },
+//     })
+//         .select(['total', 'createdAt'])
+// });
 
 
 OrderSchema.static('getLatestTransactions', () => {
