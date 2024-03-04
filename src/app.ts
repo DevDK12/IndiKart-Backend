@@ -9,6 +9,8 @@ import globalError from './middlewares/globalError.js';
 import userRouter from './routes/user.js';
 import productRouter from './routes/product.js';
 import orderRouter from './routes/order.js';
+import paymentRouter from './routes/payment.js';
+
 import { deleteRandomsProducts, generateRandomProducts } from './utils/generateRandomProducts.js';
 import { invalidateCache } from './utils/functions.js';
 import { deleteRandomOrders, generateRandomOrders } from './utils/generateRandomeOrders.js';
@@ -45,6 +47,7 @@ app.use('/uploads', express.static('uploads'));
 app.use('/api/v1/user', userRouter);
 app.use('/api/v1/product', productRouter);
 app.use('/api/v1/order', orderRouter);
+app.use('/api/v1/payment', paymentRouter);
 
 
 app.use('/api/v1/create-data', async (req, res, next) => {
