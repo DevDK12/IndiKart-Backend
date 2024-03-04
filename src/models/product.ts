@@ -8,6 +8,7 @@ const Schema = mongoose.Schema;
 
 interface ProductModel extends Model<IProduct> {
     getMonthProducts : ({start, end}: {start: Date, end: Date}) => Promise<any>,
+    getAllCategoriesStats: () => Promise<any>,
 }
 
 
@@ -61,6 +62,16 @@ ProductSchema.static('getMonthProducts', ({start, end}) => {
             $lte: end,
         },
     });
+});
+
+
+ProductSchema.static('getAllCategoriesStats', async () => {
+    const allCategories = await Product.find().distinct('category');
+
+    const categoriesCount = await Promise.all(allCategories.map((category: any) => Product.find({ category }).countDocuments()));
+    const categories = allCategories.map((category: any, index: number) => ({ name: category, count: categoriesCount[index] }));
+
+    return categories;
 });
 
 

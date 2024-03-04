@@ -2,7 +2,7 @@ import fs from 'fs';
 import bcrypt from 'bcryptjs';
 import { myCache } from '../app.js';
 import { invalidateCacheType } from '../types/types.js';
-import { OrderItemType } from '../types/OrderTypes.js';
+import { IOrder, OrderItemType } from '../types/OrderTypes.js';
 import Product from '../models/product.js';
 import AppError from '../error/appError.js';
 
@@ -72,7 +72,7 @@ export const calculatePercentage = (thisMonth: number, lastMonth: number) => {
 };
 
 
-export const getLastSixMonthsChartData = (lastSixMonthsOrders : any)=>{
+export const getLastSixMonthsChartData = (lastSixMonthsOrders : IOrder[])=>{
     const lastSixMonthsRevenue = new Array(6).fill(0);
     const lastSixMonthsOrdersCount = new Array(6).fill(0);
 
