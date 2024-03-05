@@ -15,10 +15,13 @@ import statsRouter from './routes/stats.js';
 import { deleteRandomsProducts, generateRandomProducts } from './utils/generateRandomProducts.js';
 import { invalidateCache } from './utils/functions.js';
 import { deleteRandomOrders, generateRandomOrders } from './utils/generateRandomeOrders.js';
+import Stripe from 'stripe';
 
 
 const app = express();
 
+const stripe_key = process.env.STRIPE_SECRET_KEY as string;
+export const stripe = new Stripe(stripe_key);
 export const myCache = new NodeCache();
 
 app.use(express.json());
@@ -82,7 +85,7 @@ app.use('/api/v1/create-data', async (req, res, next) => {
 app.use('*', (req, res, next) => {
     res.status(404).json({
         status: 'fail',
-        message: 'Page not found',
+        message: 'API not found',
     })
 })
 

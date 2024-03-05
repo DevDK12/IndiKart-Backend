@@ -1,3 +1,4 @@
+import { stripe } from "../app.js";
 import AppError from "../error/appError.js";
 import CatchAsync from "../error/catchAsync.js";
 import Coupon from "../models/coupon.js";
@@ -91,3 +92,23 @@ export const getApplyDiscount = CatchAsync(async (req, res, next) => {
 });
 
 
+export const postCreatePaymentIntent = CatchAsync(async (req, res, next) => {
+
+    const { amount } = req.body;
+
+    if (!amount) throw new AppError('Please enter amount', 400);
+
+    const paymentIntent = await stripe.paymentIntents.create({
+        amount: Number(amount) * 100,
+        currency: "inr",
+    })
+
+
+
+    res.status(200).json({
+        status: "success",
+        data: {
+            clientSecret: paymentIntent.client_secret
+        }
+    })
+})
