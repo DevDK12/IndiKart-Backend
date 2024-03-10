@@ -1,6 +1,6 @@
 import express from 'express';
 
-import {deleteUser, getAllUsers, getUser, postRegisterUser} from '../controllers/user.js';
+import {deleteUser, getAllUsers, getUser, postLoginUser, postRegisterUser} from '../controllers/user.js';
 
 
 
@@ -10,6 +10,7 @@ const router = express.Router();
 
 
 router.post('/register', postRegisterUser );
+router.post('/login', postLoginUser );
 router.get('/all', getAllUsers );
 
 

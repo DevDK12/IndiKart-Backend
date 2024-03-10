@@ -19,19 +19,12 @@ interface UserModel extends Model<IUser> {
 
 const UserSchema = new Schema<IUser, UserModel>({
     _id: {
-        // type: mongoose.Schema.Types.ObjectId,
         type: String,
         required: [true, 'ID is required'],
     },
-
-    image: {
+    name: {
         type: String,
-        required: [true, 'Image is required'],
-    },
-
-    username: {
-        type: String,
-        required: [true, 'Username is required'],
+        required: [true, 'Name is required'],
     },
     password: {
         type: String,
@@ -42,6 +35,10 @@ const UserSchema = new Schema<IUser, UserModel>({
         required: [true, 'Email is required'],
         unique: true,
         validator: validator.default.isEmail,
+    },
+    image: {
+        type: String,
+        required: [true, 'Image is required'],
     },
     role: {
         type: String,
@@ -55,9 +52,7 @@ const UserSchema = new Schema<IUser, UserModel>({
     dob: {
         type: Date,
         required: [true, 'Date of Birth is required'],
-
     },
-
     createdAt: {
         type: Date,
         default: Date.now,

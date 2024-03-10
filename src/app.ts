@@ -2,7 +2,7 @@ import express, { Request, Response, NextFunction } from 'express';
 import dotenv from 'dotenv'; dotenv.config({ path: './.env' });
 import NodeCache from 'node-cache';
 import morgan from 'morgan';
-
+import cors from 'cors';
 
 import globalError from './middlewares/globalError.js';
 
@@ -16,6 +16,7 @@ import { deleteRandomsProducts, generateRandomProducts } from './utils/generateR
 import { invalidateCache } from './utils/functions.js';
 import { deleteRandomOrders, generateRandomOrders } from './utils/generateRandomeOrders.js';
 import Stripe from 'stripe';
+import AppError from './error/appError.js';
 
 
 const app = express();
@@ -29,6 +30,8 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use(morgan("dev"))
 
+
+app.use(cors());
 
 app.get('/', (req: Request, res: Response, next: NextFunction) => {
     res.json({

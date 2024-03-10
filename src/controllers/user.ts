@@ -1,10 +1,10 @@
 import { NextFunction, Request, Response } from "express";
 
 
-import { postRegisterUserTypes } from "../types/UserTypes.js";
+import { postLoginUserTypes, postRegisterUserTypes } from "../types/UserTypes.js";
 import User from '../models/user.js'
 import CatchAsync from "../error/catchAsync.js";
-import { genHashedPassword } from "../utils/functions.js";
+import { genHashedPassword, verifyPassword } from "../utils/functions.js";
 import AppError from "../error/appError.js";
 
 
@@ -17,39 +17,20 @@ export const postRegisterUser = CatchAsync(async (
     next: NextFunction
 ) => {
 
-    const { name, email, password, user, photo, gender, _id, dob } = req.body;
+    const { name, email, password, image, gender, _id, dob } = req.body;
 
-    // console.log(name, email, password, user, photo, gender, _id, dob);
-
+    console.log(name, email, password, image, gender, _id, dob);
 
     // Check if user already exists
-
-
     // Check if email already exists
 
-
-    // Generate hash password
     const hashedPassword = await genHashedPassword(password);
 
-
-
-    // Create new user
-
-
-    // Save user to database
-
-
-    // Send response to client
-
-
-
-
-
     const newUser = new User({
-        username: name,
+        name,
         email,
         _id,
-        image: photo,
+        image,
         password: hashedPassword,
         role: 'user',
         dob: new Date(dob),
@@ -62,6 +43,39 @@ export const postRegisterUser = CatchAsync(async (
     res.status(201).json({
         status: 'success',
         message: 'User registered successfully',
+    });
+
+
+});
+
+
+
+
+
+
+export const postLoginUser = CatchAsync(async (
+    req: Request<{}, {}, postLoginUserTypes>,
+    res: Response,
+    next: NextFunction
+) => {
+
+    const { email, password } = req.body;
+
+    // Check if user exists
+    const user = await User.findOne({email});
+
+    if (!user) throw new AppError('No user found', 400);
+    
+
+    //_ Do this part later as type checking remaining
+
+    // const {password: hashedPassword } = user;
+    // const match = await verifyPassword(password, hashedPassword);
+
+
+    res.status(201).json({
+        status: 'success',
+        message: 'User Loggedin successfully',
     });
 
 
