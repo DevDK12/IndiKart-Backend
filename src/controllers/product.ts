@@ -134,7 +134,6 @@ export const getLatestProducts = CatchAsync(async (req, res, next) => {
 
     res.status(200).json({
         status: 'success',
-        message: 'Latest Products fetched successfully',
         data: {
             products,
         }
@@ -159,7 +158,6 @@ export const getAllCategories = CatchAsync(async (req, res, next) => {
 
     res.status(200).json({
         status: 'success',
-        message: 'Latest Products fetched successfully',
         data: {
             categories,
         }
@@ -172,19 +170,20 @@ export const getAllCategories = CatchAsync(async (req, res, next) => {
 
 export const getAdminProducts = CatchAsync(async (req, res, next) => {
 
+    const {userId} = req.params;
+
     let products;
     if (myCache.has('all-products')) {
         products = JSON.parse(myCache.get('all-products') as string);
     }
     else {
-        products = await Product.find({});
+        products = await Product.find({user: userId});
         myCache.set('all-products', JSON.stringify(products));
     }
 
 
     res.status(200).json({
         status: 'success',
-        message: 'Latest Products fetched successfully',
         data: {
             products,
         }

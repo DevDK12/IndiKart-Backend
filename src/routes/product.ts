@@ -13,7 +13,7 @@ const router = express.Router();
 router.post('/new', uploadSingle, postNewProduct );
 router.get('/latest', getLatestProducts);
 router.get('/categories', getAllCategories);
-router.get('/admin-products', getAdminProducts);
+router.get('/admin-products/:userId', getAdminProducts);
 
 router.get('/all', getQueryProducts );
 
