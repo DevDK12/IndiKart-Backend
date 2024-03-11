@@ -11,12 +11,9 @@ import productRouter from './routes/product.js';
 import orderRouter from './routes/order.js';
 import paymentRouter from './routes/payment.js';
 import statsRouter from './routes/stats.js';
+import testingRouter from './routes/testing.js';
 
-import { deleteRandomsProducts, generateRandomProducts } from './utils/generateRandomProducts.js';
-import { invalidateCache } from './utils/functions.js';
-import { deleteRandomOrders, generateRandomOrders } from './utils/generateRandomeOrders.js';
 import Stripe from 'stripe';
-import AppError from './error/appError.js';
 
 
 const app = express();
@@ -57,30 +54,7 @@ app.use('/api/v1/order', orderRouter);
 app.use('/api/v1/payment', paymentRouter);
 app.use('/api/v1/dashboard', statsRouter);
 
-
-app.use('/api/v1/create-data', async (req, res, next) => {
-
-    const url = "uploads\\0a3123b8-39ac-4289-b23a-ff9941730971.jpg";
-    const userId = "asdfsdffdadsasdfsdsdfsadffsff";
-
-    const { type, name, amount } = req.query
-    if (type === 'new') {
-        if (name === "products") generateRandomProducts(Number(amount), url);
-        if (name === "orders") generateRandomOrders(Number(amount), userId);
-    }
-    else {
-        if (name === "products") deleteRandomsProducts(Number(amount));
-        if (name === "orders") deleteRandomOrders(Number(amount));
-    }
-
-    await invalidateCache({ products: true });
-
-    return res.status(200).json({
-        status: 'success',
-        message: `Data ${type === 'new' ? 'created' : 'deleted'} successfully`,
-    })
-});
-
+app.use('/api/v1/testing', testingRouter);
 
 
 
