@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 
 
 export interface IProduct {
@@ -5,6 +6,8 @@ export interface IProduct {
     name: string;
     stock: number;
     price: number;
+    // user: typeof mongoose.Schema.ObjectId;
+    user: string;
     category: string;
     createdAt: Date;
 }

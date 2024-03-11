@@ -39,6 +39,12 @@ const ProductSchema = new Schema<IProduct, ProductModel>({
         trim: true,
     },
 
+    user: {
+        type: String,
+        ref: "User",
+        required: true,
+    },
+
     createdAt: {
         type: Date,
         default: Date.now,
