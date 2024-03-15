@@ -20,7 +20,7 @@ let server:Server;
 
 const mongo_uri = process.env.MONGO_URI || "mongodb://127.0.0.1:27017";
 mongoConnect(mongo_uri, ()=>{
-    server = app.listen(3000, () => {
+    server = app.listen(port, () => {
         console.log(`Server listening on ${base_url}/${port}/api/v1`);
     })
 });

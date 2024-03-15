@@ -62,7 +62,7 @@ const globalError = (err: AppError | any, req: Request, res: Response, next: Nex
 
         if (err.name === 'CastError') err = handleCastErrorDB(err);
         if (err.name === 'ValidationError')  err = handleValidationErrorDB(err);
-        if (err.code === '11000') err = handleValidationErrorDB(err);
+        if (err.code === '11000') err = handleDuplicateFieldsDB(err);
 
 
         sendProductionError(err, res);
