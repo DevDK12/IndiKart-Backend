@@ -17,7 +17,7 @@ export interface IProduct {
 
 
 export interface newProductReqType {
-
+    user: string,
     name: string,
     category: string,
     price: number,
@@ -36,6 +36,7 @@ export interface SearchRequestQuery {
     search?: string,
     sort?: string,
     page?: string,
+    product_per_page?: number,
 };
 
 

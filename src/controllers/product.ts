@@ -4,11 +4,11 @@ import { NextFunction, Request, Response } from "express";
 import Product from '../models/product.js'
 import CatchAsync from "../error/catchAsync.js";
 import AppError from "../error/appError.js";
-import { BaseQueryType, SearchRequestQuery, newProductReqType } from "../types/ProductTypes.js";
+import { BaseQueryType, IProduct, SearchRequestQuery, newProductReqType } from "../types/ProductTypes.js";
 import { deleteImage, invalidateCache } from "../utils/functions.js";
 import { myCache } from "../app.js";
 
-
+import { PRODUCTS_PER_PAGE } from "../utils/constants.js";
 
 
 
@@ -18,7 +18,7 @@ export const postNewProduct = CatchAsync(async (
     next: NextFunction
 ) => {
 
-    const { name, price, category, stock } = req.body;
+    const { name, price, category, stock, user } = req.body;
     const photo = req.file as Express.Multer.File;
 
     console.log(photo);
@@ -33,6 +33,7 @@ export const postNewProduct = CatchAsync(async (
             stock,
             category: category.toLowerCase(),
             price,
+            user,
         });
 
         await invalidateCache({ products: true, admin: true });
@@ -121,15 +122,9 @@ export const deleteProduct = CatchAsync(async (req, res, next) => {
 export const getLatestProducts = CatchAsync(async (req, res, next) => {
 
     let products = [];
-    if (myCache.has('latest-products')) {
-        // products = JSON.parse(myCache.get('latest-products')!);
-        products = JSON.parse(myCache.get('latest-products') as string);
-    }
-    else {
-        products = await Product.find().sort({ createdAt: -1 }).limit(5);
-        myCache.set('latest-products', JSON.stringify(products));
-    }
-    // products = await Product.find().sort({ createdAt: -1 }).limit(5);
+    const {product_per_page} = req.query;
+    
+    products = await Product.find().sort({ createdAt: -1 }).limit(Number(product_per_page) || 5);
 
 
     res.status(200).json({
@@ -202,8 +197,7 @@ export const putUpdateProduct = CatchAsync(async (req, res, next) => {
     const { name, price, category, stock } = req.body;
     const photo = req.file as Express.Multer.File;
 
-
-    const product = await Product.findById(productId);
+    const product  = await Product.findById(productId);
 
     if (!product) throw new AppError('No product found', 400);
 
@@ -245,11 +239,12 @@ export const putUpdateProduct = CatchAsync(async (req, res, next) => {
 
 export const getQueryProducts = CatchAsync(async (req: Request<{}, {}, {}, SearchRequestQuery>, res, next) => {
 
-    const { search, category, sort, price } = req.query;
+    const { search, category, sort, price, product_per_page } = req.query;
 
     const page = Number(req.query.page) || 1;
-    const limit = Number(process.env.PRODUCTS_PER_PAGE) || 10;
+    const limit = product_per_page || Number(PRODUCTS_PER_PAGE);
     const skip = (page - 1) * limit;
+
 
 
     const baseQuery: BaseQueryType = {};
@@ -263,7 +258,7 @@ export const getQueryProducts = CatchAsync(async (req: Request<{}, {}, {}, Searc
     const allFilteredProductsPerPagePromise = Product.find(baseQuery)
         .sort(sort && { price: sort === 'asc' ? 1 : -1 })
         .skip(skip)
-        .limit(limit)
+        .limit(limit )
 
     const allFilteredProductsPromise = Product.find(baseQuery);
 
@@ -275,7 +270,7 @@ export const getQueryProducts = CatchAsync(async (req: Request<{}, {}, {}, Searc
             ]
         );
 
-    const totalPage = Math.ceil(allFilteredProducts.length / limit);
+    const totalPage = Math.ceil(allFilteredProducts.length / limit );
 
 
 
