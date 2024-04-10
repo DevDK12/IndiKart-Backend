@@ -58,15 +58,6 @@ export const invalidateCache = async ({
 
 
 
-export const reduceStock = async (orderItems: [OrderItemType]) => {
-    orderItems.forEach(async (item) => {
-        const product = await Product.findById(item.productId);
-        if (!product) throw new AppError('No product found', 400);
-        product.stock -= item.quantity;
-        await product.save();
-    });
-}
-
 
 
 export const calculatePercentage = (thisMonth: number, lastMonth: number) => {

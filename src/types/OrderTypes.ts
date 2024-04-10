@@ -14,7 +14,7 @@ export type ShippingInfoType = {
     city: string;
     country: string;
     state : string;
-    pincode: number;
+    pinCode: number;
 }
 
 
@@ -22,7 +22,7 @@ export interface NewOrderRequestType {
     shippingInfo: ShippingInfoType;
     user: string;
     tax: number;
-    shippingCharge: number;
+    shippingCharges: number;
     total: number;
     subtotal: number;
     discount: number;

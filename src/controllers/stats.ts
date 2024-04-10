@@ -209,7 +209,7 @@ export const getPieCharts = CatchAsync(async (req, res, next) => {
 
     const grossIncome = allOrders.reduce((prev: number, order: IOrder) => prev + (order.total || 0), 0);
     const discount = allOrders.reduce((prev: number, order: IOrder) => prev + (order.discount || 0), 0);
-    const productionCost = allOrders.reduce((prev: any, order: IOrder) => prev + (order.shippingCharge || 0), 0);
+    const productionCost = allOrders.reduce((prev: any, order: IOrder) => prev + (order.shippingCharges || 0), 0);
     const burnt = allOrders.reduce((prev: any, order: IOrder) => prev + (order.tax || 0), 0);
 
     const marketingCost = Math.round(grossIncome * (30 / 100));

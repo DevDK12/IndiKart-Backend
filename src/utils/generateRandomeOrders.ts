@@ -12,14 +12,14 @@ export const generateRandomOrders = async (count: number = 10,  userId: string) 
             shippingInfo: {
                 address: faker.location.streetAddress(),
                 city: faker.location.city(),
-                pincode: faker.number.int,
+                pinCode: faker.number.int,
                 country: faker.location.country(),
                 state : faker.location.state(),
             },
 
             user: userId,
             tax: faker.commerce.price({ min: 0, max: 1000}),
-            shippingCharge: faker.commerce.price({ min: 0, max: 400}),
+            shippingCharges: faker.commerce.price({ min: 0, max: 400}),
             total: faker.commerce.price({ min: 1000, max: 100000}),
             subtotal: faker.commerce.price({ min: 1000, max: 100000}),
             discount: faker.commerce.price({ min: 0, max: 500}),

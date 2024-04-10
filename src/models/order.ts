@@ -34,7 +34,7 @@ const OrderSchema = new Schema<IOrder, OrderModel>({
             type: String,
             required: [true, 'Country is required'],
         },
-        pincode: {
+        pinCode: {
             type: Number,
             required: [true, 'Pincode is required'],
         },
@@ -56,7 +56,7 @@ const OrderSchema = new Schema<IOrder, OrderModel>({
         required: [true, 'Tax is required'],
     },
 
-    shippingCharge: {
+    shippingCharges: {
         type: Number,
         required: [true, 'ShippingCharge is required'],
     },
@@ -91,6 +91,7 @@ const OrderSchema = new Schema<IOrder, OrderModel>({
             quantity: Number,
             photo: String,
             price: Number,
+            productId: String,
             OrderId: {
                 type: mongoose.Types.ObjectId,
                 ref: 'Order',

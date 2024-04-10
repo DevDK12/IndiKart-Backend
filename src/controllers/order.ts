@@ -2,9 +2,10 @@ import CatchAsync from "../error/catchAsync.js";
 import Order from "../models/order.js";
 import { NewOrderRequestType } from "../types/OrderTypes.js";
 import { Request } from "express";
-import { invalidateCache, reduceStock } from "../utils/functions.js";
+import { invalidateCache} from "../utils/functions.js";
 import AppError from "../error/appError.js";
 import { myCache } from "../app.js";
+import Product from "../models/product.js";
 
 
 
@@ -23,7 +24,6 @@ export const getMyOrders = CatchAsync(async (req, res, next) => {
         orders = JSON.parse(myCache.get(key) as string);
     } else {
         orders = await Order.find({ user: userId });
-        if(orders.length === 0) throw new AppError('No orders found', 404);
         myCache.set(key, JSON.stringify(orders));
     }
 
@@ -47,8 +47,8 @@ export const getAllOrders = CatchAsync(async (req, res, next) => {
     if (myCache.has(key)) {
         orders = JSON.parse(myCache.get(key) as string);
     } else {
-        orders = await Order.find().populate('user', "username email");
-        if(orders.length === 0) throw new AppError('No orders found', 404);
+        orders = await Order.find().populate('user', "name email");
+
         myCache.set(key, JSON.stringify(orders));
     }
 
@@ -73,7 +73,7 @@ export const getSingleOrder = CatchAsync(async (req, res, next) => {
     if (myCache.has(key)) {
         order = JSON.parse(myCache.get(key) as string);
     } else {
-        order = await Order.findById(orderId).populate('user', "username email");
+        order = await Order.findById(orderId).populate('user', "name email");
         if (!order) throw new AppError('No order found', 404);
         myCache.set(key, JSON.stringify(order));
     }
@@ -119,7 +119,7 @@ export const postNewOrder = CatchAsync(async (
         shippingInfo,
         user,
         tax,
-        shippingCharge,
+        shippingCharges,
         total,
         subtotal,
         discount,
@@ -127,17 +127,28 @@ export const postNewOrder = CatchAsync(async (
     } = req.body;
 
 
-    if (!shippingCharge === undefined || !shippingInfo || !user || tax === undefined || total === undefined || subtotal === undefined || discount === undefined || !orderItems) {
+    if (!shippingCharges === undefined || !shippingInfo || !user || tax === undefined || total === undefined || subtotal === undefined || discount === undefined || !orderItems) {
         throw new AppError('Please provide all the required fields', 400);
     }
 
 
+    try {
+        await Promise.all(orderItems.map(async (item) => {
+            const product = await Product.findById(item.productId);
+            if (!product) throw new AppError('Some Product in Order does not exist', 400);
+            product.stock -= item.quantity;
+            await product.save();
+        }));
+    } catch (error) {
+        const err = error as AppError;
+        throw new AppError(err.message, 400);
+    }
 
     await Order.create({
         shippingInfo,
         user,
         tax,
-        shippingCharge,
+        shippingCharges,
         total,
         subtotal,
         discount,
@@ -145,7 +156,6 @@ export const postNewOrder = CatchAsync(async (
     });
 
 
-    await reduceStock(orderItems);
 
     invalidateCache({ products: true, order: true, admin: true });
 
@@ -177,11 +187,12 @@ export const putProcessOrder = CatchAsync(async (req, res, next) => {
         case 'shipped':
             order.status = 'delivered';
             break;
-        case 'delivered':
-            order.status = 'cancelled';
-            break;
+        //_ Need to develop diferent api to cancel order
+        // case 'delivered':
+        //     order.status = 'cancelled';
+        //     break;
         default:
-            order.status = 'processing';
+            order.status = order.status;
     }
 
     order.save();
