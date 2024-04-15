@@ -1,4 +1,3 @@
-import { myCache } from "../app.js";
 import CatchAsync from "../error/catchAsync.js";
 import Order from "../models/order.js";
 import Product from "../models/product.js";
@@ -10,20 +9,6 @@ import { calculatePercentage, getChartData } from "../utils/functions.js";
 
 
 export const getDashboardStats = CatchAsync(async (req, res, next) => {
-
-    const key = "dashboard-stats";
-
-    if (myCache.has(key)) {
-        const stats = JSON.parse(myCache.get(key) as string);
-        return res.status(200).json({
-            status: "success",
-            data: {
-                stats
-            }
-        });
-    }
-
-
 
     const today = new Date();
 
@@ -58,7 +43,7 @@ export const getDashboardStats = CatchAsync(async (req, res, next) => {
         males,
         females,
         latestTransactions,
-        categoriesStats,
+        categoriesList,
     ] = await Promise.all([
         Product.getMonthProducts(thisMonth),
         Product.getMonthProducts(lastMonth),
@@ -97,7 +82,10 @@ export const getDashboardStats = CatchAsync(async (req, res, next) => {
 
 
 
-    const lastSixMonthsChart = {
+    const lastSixMonthsChart: {
+        lastSixMonthsOrders: number[];
+        lastSixMonthsRevenue: number[];
+    } = {
         lastSixMonthsOrders: getChartData({
             months: 6,
             docArray: lastSixMonthsOrders,
@@ -108,6 +96,7 @@ export const getDashboardStats = CatchAsync(async (req, res, next) => {
             property: 'total',
         }),
     };
+
 
     const userRatio = {
         male: males,
@@ -125,6 +114,10 @@ export const getDashboardStats = CatchAsync(async (req, res, next) => {
 
 
 
+    const categoriesStats = {
+        list: categoriesList,
+        total: categoriesList.length,
+    };
 
     const stats = {
         changePercent,
@@ -135,7 +128,6 @@ export const getDashboardStats = CatchAsync(async (req, res, next) => {
         latestTransactions: transformedLatestTransaction,
     };
 
-    myCache.set(key, JSON.stringify(stats));
 
     return res.status(200).json({
         status: "success",
@@ -152,19 +144,6 @@ export const getDashboardStats = CatchAsync(async (req, res, next) => {
 
 
 export const getPieCharts = CatchAsync(async (req, res, next) => {
-
-    const key = 'admin-pie-chart';
-
-    if (myCache.has(key)) {
-        const charts = JSON.parse(myCache.get(key) as string);
-
-        return res.status(200).json({
-            status: "success",
-            data: {
-                charts,
-            }
-        })
-    }
 
     const [
         processingOrder,
@@ -247,9 +226,6 @@ export const getPieCharts = CatchAsync(async (req, res, next) => {
     }
 
 
-    myCache.set(key, JSON.stringify(charts));
-
-
     return res.status(200).json({
         status: "success",
         data: {
@@ -263,20 +239,6 @@ export const getPieCharts = CatchAsync(async (req, res, next) => {
 
 
 export const getBarCharts = CatchAsync(async (req, res, next) => {
-
-    const key = 'admin-bar-chart';
-
-    if (myCache.has(key)) {
-        const charts = JSON.parse(myCache.get(key) as string);
-
-        return res.status(200).json({
-            status: "success",
-            data: {
-                charts,
-            }
-        })
-    }
-
 
     const sixMonthsAgo = {
         start: new Date(new Date().setMonth(new Date().getMonth() - 6)),
@@ -307,8 +269,6 @@ export const getBarCharts = CatchAsync(async (req, res, next) => {
         orders: ordersCounts,
     };
 
-    myCache.set(key, JSON.stringify(charts));
-
 
     return res.status(200).json({
         status: "success",
@@ -325,21 +285,6 @@ export const getBarCharts = CatchAsync(async (req, res, next) => {
 
 export const getLineCharts = CatchAsync(async (req, res, next) => {
 
-
-    const key = 'admin-line-chart';
-
-    if (myCache.has(key)) {
-        const charts = JSON.parse(myCache.get(key) as string);
-
-        return res.status(200).json({
-            status: "success",
-            data: {
-                charts,
-            }
-        })
-    }
-
-    
 
     const twelveMonthsAgo = {
         start: new Date((new Date()).setMonth((new Date).getMonth() - 12)),
@@ -365,7 +310,6 @@ export const getLineCharts = CatchAsync(async (req, res, next) => {
         revenue,
     };
 
-    myCache.set(key, JSON.stringify(charts));
 
 
     return res.status(200).json({

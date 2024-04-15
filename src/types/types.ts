@@ -17,4 +17,5 @@ export type invalidateCacheType = {
     products?: boolean,
     admin?: boolean,
     order?: boolean,
+    stats?: boolean,
 }

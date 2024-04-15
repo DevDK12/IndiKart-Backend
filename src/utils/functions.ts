@@ -35,6 +35,7 @@ export const invalidateCache = async ({
     products,
     order,
     admin,
+    stats,
 }: invalidateCacheType) => {
 
     if (products) {
@@ -52,6 +53,11 @@ export const invalidateCache = async ({
     if (admin) {
         const adminCacheKeys = myCache.keys().filter(key => key.includes('admin'));
         myCache.del(adminCacheKeys);
+    }
+
+    if(stats){
+        const statsCacheKeys = myCache.keys().filter(key => key.includes('stats'));
+        myCache.del(statsCacheKeys);
     }
 }
 

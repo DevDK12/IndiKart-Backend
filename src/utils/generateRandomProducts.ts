@@ -11,7 +11,7 @@ export const generateRandomProducts = async (count: number = 10, url: string, us
     for (let i = 0; i < count; i++) {
         const product = {
             name: faker.commerce.productName(),
-            photo: faker.image.url(),
+            photo:url,
             price: faker.commerce.price({ min: 1500, max: 80000, dec: 0 }),
             stock: faker.commerce.price({ min: 0, max: 100, dec: 0 }),
             category: faker.commerce.department().toLowerCase(),
