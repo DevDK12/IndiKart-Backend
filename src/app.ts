@@ -30,7 +30,7 @@ app.use(morgan("dev"))
 
 app.use(cors());
 
-app.get('/', (req: Request, res: Response, next: NextFunction) => {
+app.get('/api/v1', (req: Request, res: Response, next: NextFunction) => {
     res.json({
         status: 'success',
         message: 'API working',

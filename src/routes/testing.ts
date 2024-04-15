@@ -13,12 +13,10 @@ const router = express.Router();
 
 router.use('/create-data', CatchAsync(async (req, res, next) => {
 
-    const url = "uploads\\0a3123b8-39ac-4289-b23a-ff9941730971.jpg";
-    // const userId = "asdfsdffdadsasdfsdsdfsadffsff";
 
-    const { type, name, amount, userId } = req.query
+    const { type, name, amount, userId, imageUrl } = req.query
     if (type === 'new') {
-        if (name === "products") generateRandomProducts(Number(amount), url, userId as string);
+        if (name === "products") generateRandomProducts(Number(amount), imageUrl as string, userId as string);
         if (name === "orders") generateRandomOrders(Number(amount), userId as string);
     }
     else {
@@ -36,7 +34,7 @@ router.use('/create-data', CatchAsync(async (req, res, next) => {
 );
 
 router.get('/revalidate', CatchAsync(async (req, res, next) => {
-    await invalidateCache({ products: true, admin: true, order: true });
+    await invalidateCache({ products: true, admin: true, order: true, stats: true });
     res.status(200).json({
         status: 'success',
         message: 'Cache invalidated successfully',
