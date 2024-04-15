@@ -21,7 +21,6 @@ export const postNewProduct = CatchAsync(async (
     const { name, price, category, stock, user } = req.body;
     const photo = req.file as Express.Multer.File;
 
-    console.log(photo);
 
     if (!photo) throw new AppError('Please upload a photo', 400);
 
@@ -64,15 +63,18 @@ export const postNewProduct = CatchAsync(async (
 
 export const getSingleProduct = CatchAsync(async (req, res, next) => {
 
+    
     const { productId } = req.params;
 
+    const cacheKey = `product-${productId}`;
+
     let product;
-    if (myCache.has(`product-${productId}`)) {
-        product = JSON.parse(myCache.get(`product-${productId}`) as string);
+    if (myCache.has(cacheKey)) {
+        product = JSON.parse(myCache.get(cacheKey) as string);
     }
     else {
         product = await Product.findById(productId);
-        if (product) myCache.set(`product-${productId}`, JSON.stringify(product));
+        if (product) myCache.set(cacheKey, JSON.stringify(product));
     }
 
 
@@ -141,13 +143,15 @@ export const getLatestProducts = CatchAsync(async (req, res, next) => {
 
 export const getAllCategories = CatchAsync(async (req, res, next) => {
 
+    const cacheKey = 'product-categories'
+
     let categories;
-    if (myCache.has('categoires')) {
-        categories = JSON.parse(myCache.get('categoires') as string);
+    if (myCache.has(cacheKey)) {
+        categories = JSON.parse(myCache.get(cacheKey) as string);
     }
     else {
         categories = await Product.find().distinct('category');
-        myCache.set('categoires', JSON.stringify(categories));
+        myCache.set(cacheKey, JSON.stringify(categories));
     }
 
 
@@ -167,13 +171,15 @@ export const getAdminProducts = CatchAsync(async (req, res, next) => {
 
     const {userId} = req.params;
 
+    const cacheKey = 'product-all'
+
     let products;
-    if (myCache.has('all-products')) {
-        products = JSON.parse(myCache.get('all-products') as string);
+    if (myCache.has(cacheKey)) {
+        products = JSON.parse(myCache.get(cacheKey) as string);
     }
     else {
         products = await Product.find({user: userId});
-        myCache.set('all-products', JSON.stringify(products));
+        myCache.set(cacheKey, JSON.stringify(products));
     }
 
 
@@ -192,7 +198,6 @@ export const putUpdateProduct = CatchAsync(async (req, res, next) => {
 
     const { productId } = req.params;
 
-    console.log(productId);
 
     const { name, price, category, stock } = req.body;
     const photo = req.file as Express.Multer.File;

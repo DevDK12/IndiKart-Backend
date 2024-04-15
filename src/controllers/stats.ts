@@ -64,6 +64,7 @@ export const getDashboardStats = CatchAsync(async (req, res, next) => {
 
 
     const revenue = allOrders.reduce((sum, order: IOrder) => sum + order.total, 0)
+    console.log(revenue);
 
     const changePercent = {
         revenue,
@@ -73,7 +74,7 @@ export const getDashboardStats = CatchAsync(async (req, res, next) => {
     }
 
     const totalCount = {
-        revenue: 0,
+        revenue,
         orders: allOrders.length,
         users: usersCount,
         products: productsCount,

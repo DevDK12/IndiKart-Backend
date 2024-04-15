@@ -2,9 +2,6 @@ import fs from 'fs';
 import bcrypt from 'bcryptjs';
 import { myCache } from '../app.js';
 import { invalidateCacheType } from '../types/types.js';
-import { IOrder, OrderItemType } from '../types/OrderTypes.js';
-import Product from '../models/product.js';
-import AppError from '../error/appError.js';
 
 export const genHashedPassword = async (password: string) => {
     const hashedPassword = await bcrypt.hash(password, 12);
