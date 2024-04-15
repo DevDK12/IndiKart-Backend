@@ -106,11 +106,11 @@ export const getChartData = ({
 
         const monthsDiff = (today.getMonth() - creationDate.getMonth() + 12) % 12;
 
-        if (monthsDiff < 6) {
+        if (monthsDiff < months) {
             if (property)
-                data[6 - monthsDiff - 1] += doc[property];
+                data[months - monthsDiff - 1] += doc[property];
             else
-                data[6 - monthsDiff - 1] += 1;
+                data[months - monthsDiff - 1] += 1;
         }
     });
 
