@@ -5,10 +5,16 @@ import Product from '../models/product.js'
 import CatchAsync from "../error/catchAsync.js";
 import AppError from "../error/appError.js";
 import { BaseQueryType, IProduct, SearchRequestQuery, newProductReqType } from "../types/ProductTypes.js";
-import { deleteImage, invalidateCache } from "../utils/functions.js";
+import { invalidateCache } from "../utils/functions.js";
 import { myCache } from "../app.js";
 
 import { PRODUCTS_PER_PAGE } from "../utils/constants.js";
+import {v2 as cloudinary} from 'cloudinary';
+
+
+
+
+
 
 
 
@@ -18,16 +24,30 @@ export const postNewProduct = CatchAsync(async (
     next: NextFunction
 ) => {
 
-    const { name, price, category, stock, user } = req.body;
-    const photo = req.file as Express.Multer.File;
 
+    const { name, price, category, stock, user } = req.body;
+    const photo = req.file.photo ;
 
     if (!photo) throw new AppError('Please upload a photo', 400);
 
 
+    if(Array.isArray(photo)) {
+        throw new AppError('Please upload only one photo', 400);
+    }
+
+
+    const cloudRes = await cloudinary.uploader.upload(photo.filepath, {
+        folder: 'mern-ecommerce/products',
+        use_filename: true,
+        unique_filename: true,
+        overwrite: true,    
+    });
+
+
     try {
         await Product.create({
-            photo: photo?.path,
+            photo: cloudRes.secure_url,
+            photoPublicId: cloudRes.public_id,
             name,
             stock,
             category: category.toLowerCase(),
@@ -38,7 +58,7 @@ export const postNewProduct = CatchAsync(async (
         await invalidateCache({ products: true, admin: true });
     }
     catch (err: any) {
-        deleteImage(photo.path);
+        cloudinary.uploader.destroy(cloudRes.public_id);
         throw new AppError(err.message, 400);
     }
 
@@ -48,10 +68,6 @@ export const postNewProduct = CatchAsync(async (
     });
 
 });
-
-
-
-
 
 
 
@@ -107,7 +123,8 @@ export const deleteProduct = CatchAsync(async (req, res, next) => {
 
     await invalidateCache({ products: true, admin: true });
 
-    deleteImage(product.photo, () => console.log('Old Image deleted'));
+    // deleteImage(product.photo, () => console.log('Old Image deleted'));
+    await cloudinary.uploader.destroy(product.photoPublicId);
 
     res.status(200).json({
         status: 'success',
@@ -200,30 +217,36 @@ export const putUpdateProduct = CatchAsync(async (req, res, next) => {
 
 
     const { name, price, category, stock } = req.body;
-    const photo = req.file as Express.Multer.File;
+    const photo = req.file.photo;
 
-    const product  = await Product.findById(productId);
+    const product = await Product.findById(productId);
 
     if (!product) throw new AppError('No product found', 400);
 
-    // await Product.updateOne(
-    //     { _id: productId },
-    //     {
-    //         ...product,
-    //         photo: photo?.path,
-    //         name : name ?? product.name,
-    //         stock : stock ?? product.stock,
-    //         category: category.toLowerCase() ?? product.category,
-    //         price : price ?? product.price,
-    //     }
-    // );
 
-    if (photo) {
-        deleteImage(product.photo);
+    let publicId = product.photoPublicId;
+    let photoUrl = product.photo;
+
+
+    if(photo &&  !Array.isArray(photo)) {
+        // deleteImage(product.photo);
+        await cloudinary.uploader.destroy(product.photoPublicId);
+
+        const cloudRes = await cloudinary.uploader.upload(photo.filepath, {
+            folder: 'mern-ecommerce/products',
+            use_filename: true,
+            unique_filename: true,
+            overwrite: true,    
+        });
+        publicId = cloudRes.public_id;
+        photoUrl = cloudRes.secure_url;
     }
 
-    product.photo = photo?.path ?? product.photo;
+
+
     product.name = name ?? product.name;
+    product.photo = photoUrl;
+    product.photoPublicId = publicId;
     product.stock = stock ?? product.stock;
     product.category = category.toLowerCase() ?? product.category;
     product.price = price ?? product.price;

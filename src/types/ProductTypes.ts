@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 
 export interface IProduct {
     photo: string;
+    photoPublicId: string;
     name: string;
     stock: number;
     price: number;

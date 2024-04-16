@@ -19,6 +19,11 @@ const ProductSchema = new Schema<IProduct, ProductModel>({
         required: [true, 'Photo is required'],
     },
 
+    photoPublicId: {
+        type: String,
+        required: [true, 'Expected public id'],
+    },
+
     name: {
         type: String,
         required: [true, 'Productname is required'],

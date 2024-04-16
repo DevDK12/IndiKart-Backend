@@ -14,6 +14,7 @@ import statsRouter from './routes/stats.js';
 import testingRouter from './routes/testing.js';
 
 import Stripe from 'stripe';
+import {v2 as cloudinary} from 'cloudinary';
 
 
 const app = express();
@@ -22,10 +23,19 @@ const stripe_key = process.env.STRIPE_SECRET_KEY as string;
 export const stripe = new Stripe(stripe_key);
 export const myCache = new NodeCache();
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
 
-app.use(morgan("dev"))
+app.use(express.json()); //_ parse json
+app.use(express.urlencoded({ extended: true })); //_ parse what ?
+
+app.use(morgan("dev"));
+
+
+cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
 
 
 app.use(cors());
