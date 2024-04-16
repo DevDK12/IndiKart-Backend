@@ -25,29 +25,13 @@ export const postNewProduct = CatchAsync(async (
 ) => {
 
 
-    const { name, price, category, stock, user } = req.body;
-    const photo = req.file.photo ;
-
-    if (!photo) throw new AppError('Please upload a photo', 400);
-
-
-    if(Array.isArray(photo)) {
-        throw new AppError('Please upload only one photo', 400);
-    }
-
-
-    const cloudRes = await cloudinary.uploader.upload(photo.filepath, {
-        folder: 'mern-ecommerce/products',
-        use_filename: true,
-        unique_filename: true,
-        overwrite: true,    
-    });
+    const { name, price, category, stock, user, photoPublicId, photoUrl } = req.body;
 
 
     try {
         await Product.create({
-            photo: cloudRes.secure_url,
-            photoPublicId: cloudRes.public_id,
+            photo: photoUrl,
+            photoPublicId: photoPublicId,
             name,
             stock,
             category: category.toLowerCase(),
@@ -58,7 +42,7 @@ export const postNewProduct = CatchAsync(async (
         await invalidateCache({ products: true, admin: true });
     }
     catch (err: any) {
-        cloudinary.uploader.destroy(cloudRes.public_id);
+        cloudinary.uploader.destroy(photoPublicId);
         throw new AppError(err.message, 400);
     }
 
@@ -215,38 +199,23 @@ export const putUpdateProduct = CatchAsync(async (req, res, next) => {
 
     const { productId } = req.params;
 
-
-    const { name, price, category, stock } = req.body;
-    const photo = req.file.photo;
+    const { name, price, category, stock, photoPublicId, photoUrl } = req.body;
 
     const product = await Product.findById(productId);
 
     if (!product) throw new AppError('No product found', 400);
 
 
-    let publicId = product.photoPublicId;
-    let photoUrl = product.photo;
 
-
-    if(photo &&  !Array.isArray(photo)) {
+    if(photoPublicId && photoUrl) {
         // deleteImage(product.photo);
         await cloudinary.uploader.destroy(product.photoPublicId);
-
-        const cloudRes = await cloudinary.uploader.upload(photo.filepath, {
-            folder: 'mern-ecommerce/products',
-            use_filename: true,
-            unique_filename: true,
-            overwrite: true,    
-        });
-        publicId = cloudRes.public_id;
-        photoUrl = cloudRes.secure_url;
     }
 
 
-
     product.name = name ?? product.name;
-    product.photo = photoUrl;
-    product.photoPublicId = publicId;
+    product.photo = photoUrl ?? product.photo;
+    product.photoPublicId = photoPublicId ?? product.photoPublicId;
     product.stock = stock ?? product.stock;
     product.category = category.toLowerCase() ?? product.category;
     product.price = price ?? product.price;

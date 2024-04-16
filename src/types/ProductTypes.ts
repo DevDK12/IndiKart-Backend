@@ -23,6 +23,8 @@ export interface newProductReqType {
     category: string,
     price: number,
     stock: number,
+    photoPublicId: string,
+    photoUrl: string,
 }
 
 
