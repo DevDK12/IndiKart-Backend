@@ -6,6 +6,7 @@ import cors from 'cors';
 
 import globalError from './middlewares/globalError.js';
 
+import authRouter from './routes/auth.js';
 import userRouter from './routes/user.js';
 import productRouter from './routes/product.js';
 import orderRouter from './routes/order.js';
@@ -40,10 +41,17 @@ cloudinary.config({
 
 app.use(cors());
 
+app.get('/', (req: Request, res: Response, next: NextFunction) => {
+    res.json({
+        status: 'success',
+        message: 'Server is up',
+    })
+})
+
 app.get('/api/v1', (req: Request, res: Response, next: NextFunction) => {
     res.json({
         status: 'success',
-        message: 'API working',
+        message: 'API v1 working',
     })
 })
 
@@ -58,6 +66,7 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 app.use('/uploads', express.static('uploads'));
 
 
+app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/user', userRouter);
 app.use('/api/v1/product', productRouter);
 app.use('/api/v1/order', orderRouter);

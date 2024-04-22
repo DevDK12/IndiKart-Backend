@@ -10,12 +10,21 @@ export type CatchAsyncController = (
 ) => Promise<void | Response<any, Record<string, any>>>;
 
 
-
-
-
 export type invalidateCacheType = {
     products?: boolean,
     admin?: boolean,
     order?: boolean,
     stats?: boolean,
 }
+
+
+
+export type JWTPayload = {
+    userData: {
+        _id: string,
+        email: string,
+    }
+}
+
+
+

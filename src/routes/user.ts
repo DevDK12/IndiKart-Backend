@@ -1,6 +1,7 @@
 import express from 'express';
 
-import {deleteUser, getAllUsers, getUser, postLoginUser, postRegisterUser} from '../controllers/user.js';
+import {deleteUser, getAllUsers, getUser} from '../controllers/user.js';
+import { auth } from '../middlewares/auth.js';
 
 
 
@@ -9,16 +10,15 @@ const router = express.Router();
 
 
 
-router.post('/register', postRegisterUser );
-router.post('/login', postLoginUser );
-router.get('/all', getAllUsers );
+
+router.get('/all', auth,  getAllUsers );
 
 
 // router.get('/:userId', getUser );
 // router.delete('/:userId', deleteUser );
 router.route('/:userId')
-    .get(getUser)
-    .delete(deleteUser);
+    .get(auth, getUser)
+    .delete(auth, deleteUser);
 
 
 

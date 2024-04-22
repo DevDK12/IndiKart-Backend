@@ -4,6 +4,7 @@ import {deleteProduct, getAdminProducts, getAllCategories, getQueryProducts, get
 import { uploadSingle } from '../middlewares/multer.js';
 import fileParser from '../middlewares/fileParser.js';
 import { singleImageUpload } from '../middlewares/cloudinary.js';
+import { auth } from '../middlewares/auth.js';
 
 
 
@@ -12,18 +13,18 @@ const router = express.Router();
 
 
 
-router.post('/new', fileParser, singleImageUpload(true), postNewProduct );
+router.post('/new', auth, fileParser, singleImageUpload(true), postNewProduct );
 router.get('/latest', getLatestProducts);
 router.get('/categories', getAllCategories);
-router.get('/admin-products/:userId', getAdminProducts);
+router.get('/admin-products/:userId', auth, getAdminProducts);
 
 router.get('/all', getQueryProducts );
 
 
 router.route('/:productId')
-    .get(getSingleProduct)
-    .delete(deleteProduct)
-    .put(fileParser, singleImageUpload(false), putUpdateProduct)
+    .get(auth, getSingleProduct)
+    .delete(auth, deleteProduct)
+    .put(auth, fileParser, singleImageUpload(false), putUpdateProduct)
 
 
 

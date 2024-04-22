@@ -1,5 +1,6 @@
 import express from 'express';
 import { getBarCharts, getDashboardStats, getLineCharts, getPieCharts } from '../controllers/stats.js';
+import { auth } from '../middlewares/auth.js';
 
 
 
@@ -7,13 +8,13 @@ const router = express.Router();
 
 
 
-router.get("/stats", getDashboardStats);
+router.get("/stats", auth, getDashboardStats);
 
-router.get("/pie", getPieCharts);
+router.get("/pie", auth, getPieCharts);
 
-router.get("/bar", getBarCharts);
+router.get("/bar", auth, getBarCharts);
 
-router.get("/line", getLineCharts);
+router.get("/line", auth, getLineCharts);
 
 
 
